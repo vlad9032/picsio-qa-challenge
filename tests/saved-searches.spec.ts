@@ -2,6 +2,7 @@ import fs from 'fs';
 import { test, expect } from './fixtures';
 import { TEAMMATE_AUTH } from './global.setup';
 import { SavedSearchesTree } from './pages/saved-searches-tree.page';
+import { SearchPage } from './pages/search.page';
 
 /**
  * Saved searches — UI flows a user actually goes through.
@@ -33,7 +34,7 @@ test.describe('Saved searches: create', () => {
     expect(stored).toMatchObject({ teamId: expect.any(String), data: { text: 'guide' } });
 
     // Opening it from the tree restores the query and returns the same result set.
-    await page.goto('/search');
+    await search.open();
     await tree.open();
     await tree.item(name).open();
     await expect(page).toHaveURL(/text=guide/);
@@ -116,7 +117,7 @@ test.describe('Saved searches: team vs personal for a teammate', () => {
     const context = await browser.newContext({ storageState: TEAMMATE_AUTH });
     const page = await context.newPage();
     const tree = new SavedSearchesTree(page);
-    await page.goto('/search');
+    await new SearchPage(page).open(); // waits for the catalog to load before the panel is toggled
     await tree.open();
 
     await expect(tree.item(teamName).name).toBeVisible();
@@ -128,12 +129,12 @@ test.describe('Saved searches: team vs personal for a teammate', () => {
 });
 
 test.describe('Saved searches: manage from the tree', () => {
-  test('rename from the tree updates the item in place and on the server', async ({ tree, api, uniqueName, page }) => {
+  test('rename from the tree updates the item in place and on the server', async ({ tree, search, api, uniqueName }) => {
     const before = uniqueName('rename me');
     const after = uniqueName('renamed');
     await api.create(before, 'guide');
 
-    await page.goto('/search');
+    await search.open();
     await tree.open();
     const res = await tree.item(before).rename(after);
     expect(res.ok()).toBeTruthy();
@@ -145,11 +146,11 @@ test.describe('Saved searches: manage from the tree', () => {
     expect(await api.findByName(before)).toBeUndefined();
   });
 
-  test('delete asks for confirmation and removes the search from the tree and the server', async ({ tree, api, uniqueName, page }) => {
+  test('delete asks for confirmation and removes the search from the tree and the server', async ({ tree, search, api, uniqueName }) => {
     const name = uniqueName('delete me');
     const created = await api.create(name, 'guide');
 
-    await page.goto('/search');
+    await search.open();
     await tree.open();
     const res = await tree.item(name).delete();
     expect(res.url()).toContain(created._id);

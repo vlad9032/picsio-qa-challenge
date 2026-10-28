@@ -15,13 +15,21 @@ export class SavedSearchesTree {
     this.personalSection = this.section('Personal Saved Searches');
   }
 
-  /** The rail button toggles the panel and Pics.io remembers the last opened panel across reloads: wait, then toggle only if needed. */
+  /**
+   * The rail button toggles the panel and Pics.io remembers the last opened panel across reloads: wait for a
+   * remembered panel first, then toggle. A click that lands while the app is still initialising can be swallowed
+   * or undone by the restored state, so the toggle is retried a couple of times.
+   */
   async open() {
-    const alreadyOpen = await this.panel
-      .waitFor({ state: 'visible', timeout: 3_000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!alreadyOpen) await this.page.locator('#button-search').click();
+    const rail = this.page.locator('#button-search');
+    await expect(rail).toBeVisible();
+    const visible = (timeout: number) =>
+      this.panel.waitFor({ state: 'visible', timeout }).then(() => true).catch(() => false);
+    let open = await visible(3_000);
+    for (let attempt = 0; attempt < 3 && !open; attempt++) {
+      await rail.click();
+      open = await visible(5_000);
+    }
     await expect(this.panel).toBeVisible();
   }
 

@@ -34,10 +34,11 @@ async function login(browser: Browser, email: string, password: string, file: st
   // The cookie banner (CookieYes) loads asynchronously and covers the form. Accept it whenever it shows up,
   // so a click on the form is never intercepted; the consent cookie then lands in the stored session.
   await page.addLocatorHandler(page.locator('.cky-consent-container'), async (banner) => {
-    await banner
-      .getByRole('button', { name: /accept all/i })
-      .click({ timeout: 2_000 })
-      .catch(() => banner.evaluate((el) => el.remove()));
+    // Accept if the button is there, otherwise drop the overlay. The handler must never throw: a thrown handler
+    // fails the click that triggered it.
+    const accept = banner.getByRole('button', { name: /accept all/i });
+    if (await accept.isVisible().catch(() => false)) await accept.click({ timeout: 5_000 }).catch(() => {});
+    else await banner.evaluate((el) => el.remove(), undefined, { timeout: 2_000 }).catch(() => {});
   });
   await page.getByLabel(/email/i).first().fill(email);
   await page.locator('input[type="password"]').fill(password);
