@@ -21,7 +21,8 @@ Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
 15. Answer the qualifying questions in the job post and sent the application.
 
 
-As result - 12 cases on playwright - all pass (1 failed case - SS-bug-1- marker as pass bacause of expected failure, when it will be fixed we will detect and change case)
+As result - 12 cases on playwright - all pass (1 failed case - SS-bug-1- marker as pass bacause of expected failure, when it will be fixed we will detect and change case).
+
 Bugs in the end of the document
 
 The plan below was drafted by сlaude and approved by me:
