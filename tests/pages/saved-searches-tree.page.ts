@@ -58,8 +58,11 @@ export class TreeItem {
     return this.row.locator(`[data-testid="${testId}"]`);
   }
 
+  /** Clicks the item and waits for the search it triggers, so the counter and the grid are already updated. */
   async open() {
+    const searched = this.page.waitForResponse((r) => r.url().endsWith('/images/search') && r.request().method() === 'POST');
     await this.name.click();
+    await searched;
   }
 
   async rename(newName: string) {

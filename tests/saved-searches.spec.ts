@@ -37,7 +37,7 @@ test.describe('Saved searches: create', () => {
     await tree.open();
     await tree.item(name).open();
     await expect(page).toHaveURL(/text=guide/);
-    expect(await search.assetCount()).toBe(expectedCount);
+    await expect.poll(() => search.assetCount(), { message: 'the reopened search shows the same number of assets' }).toBe(expectedCount);
   });
 
   test('with "Share with my team" unchecked the search is personal and is not shared with the team', async ({ search, tree, api, uniqueName }) => {
