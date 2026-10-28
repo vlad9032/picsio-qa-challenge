@@ -52,7 +52,7 @@ automated, no Playwright evidence: these are manual observations, reproduced twi
 | Id | Severity | Finding | How to see it |
 |---|---|---|---|
 | PDF-OBS-1 | Minor, third-party | After *Edit* on a PDF the text is re-rendered with other fonts: lines wrap differently and some icons turn into `�`. Clear when you zoom in. The cause is the PDF import in Photopea, not Pics.io, but the user sees a "damaged" document. | Preview a PDF → *Edit* → zoom in on a page |
-| PDF-IMP-1 | Improvement | An edited PDF cannot be saved back. Pics.io shows a warning about it when the editor opens, but the warning has a *Do not show again* checkbox, and after that *File → Save* in the editor does nothing and says nothing. A user who ticked the checkbox once loses the edit silently. Better: repeat the message on *Save* or disable *Save* for PDF. | *Edit* a PDF → change something → *File → Save* → reload: no new revision. The warning flag is `editorDontShowAlertForExtensions` in localStorage |
+| PDF-IMP-1 | Improvement | An edited PDF cannot be saved back. Pics.io shows a warning about it when the editor opens, but the warning has a *Do not show again* checkbox, and after that *File → Save* in the editor does nothing and says nothing. A user who ticked the checkbox once loses the edit silently, and the editor itself still offers *Save* as if it worked. Better: repeat the message on *Save*, or disable *Save* for PDF and show *Download* instead. | *Edit* a PDF → change something → *File → Save* → reload: no new revision, no message. The warning is per browser (`editorDontShowAlertForExtensions` in localStorage): it shows in an incognito window and not in a browser where the checkbox was ticked once |
 
 ## Not covered yet, next steps
 
