@@ -5,34 +5,60 @@ import { Locator, Page, expect } from '@playwright/test';
  */
 export class SearchPage {
   readonly searchBar: Locator;
+  readonly counter: Locator;
   readonly saveThisSearchButton: Locator;
   readonly dialog: SaveSearchDialog;
 
   constructor(readonly page: Page) {
     this.searchBar = page.getByPlaceholder('Search all collections');
+    // The visible "N assets" counter (a hidden duplicate exists in the DOM).
+    this.counter = page.locator('.searchHeader-counter').locator('visible=true').first();
     // Filter bar has two icon buttons without text: "Add more filters" and "Save this search" (tooltips).
     this.saveThisSearchButton = page.locator('.searchFilters__iconBtn').last();
     this.dialog = new SaveSearchDialog(page);
   }
 
   async open() {
+    // The catalog loads asynchronously and re-initialises the search bar while it does: wait for its first search
+    // to finish and reach the counter before typing, otherwise the typed text can be wiped.
+    const loaded = this.waitForSearchResponse();
     await this.page.goto('/search');
     await expect(this.searchBar).toBeVisible();
+    await this.waitForCounter(await loaded);
   }
 
-  /** Types a query in the top bar and waits for the search request to finish. */
+  /** Types a query in the top bar and waits until the server answered it and the counter shows the result. */
   async searchFor(text: string) {
-    const done = this.page.waitForResponse((r) => r.url().endsWith('/images/search') && r.request().method() === 'POST');
+    const done = this.waitForSearchResponse((body) => body?.text === text);
     await this.searchBar.fill(text);
+    await expect(this.searchBar).toHaveValue(text);
     await this.searchBar.press('Enter');
-    await done;
+    await this.waitForCounter(await done);
     await expect(this.page).toHaveURL(new RegExp(`text=${encodeURIComponent(text)}`));
+  }
+
+  /** Resolves with the server's `total` of the next successful POST /images/search whose request body matches. */
+  private async waitForSearchResponse(match: (body: any) => boolean = () => true): Promise<number> {
+    const res = await this.page.waitForResponse((r) => {
+      if (!r.url().endsWith('/images/search') || r.request().method() !== 'POST' || !r.ok()) return false;
+      try {
+        return match(r.request().postDataJSON());
+      } catch {
+        return false;
+      }
+    });
+    return (await res.json()).total as number;
+  }
+
+  /** The counter is the last thing updated after a search; waiting for it means the page has rendered the response. */
+  private async waitForCounter(total: number) {
+    await expect(this.counter).toHaveText(total === 0 ? 'No assets' : `${total} ${total === 1 ? 'asset' : 'assets'}`);
   }
 
   /** "N assets" counter inside the search bar. */
   async assetCount(): Promise<number> {
     // Rendered as "2\n   assets" inside .searchHeader-counter; a hidden duplicate exists, so take the visible one.
-    const counter = this.page.locator('.searchHeader-counter').locator('visible=true').first();
+    const counter = this.counter;
     await expect(counter).toHaveText(/\d+\s*assets?/);
     return Number((await counter.innerText()).match(/\d+/)![0]);
   }
