@@ -2,9 +2,11 @@
 
 Test plan + Playwright (TypeScript) suite for the **Saved searches** feature of [Pics.io](https://pics.io).
 
-- **Test plan:** [TEST_PLAN.md](TEST_PLAN.md) — what I chose, why, what I cover by aspect, what I automate and what
-  I deliberately leave manual, metrics, and the defects found while exploring.
-- **Suite:** `tests/` — 11 tests, ~3 minutes, serial on one trial account.
+- **Test plan:** [TEST_PLAN.md](TEST_PLAN.md) — how I worked on the task, the plan in short, then the details:
+  what I cover by aspect, what I automate and what I leave manual, metrics, and the defects found.
+- **Test cases:** [TEST_CASES.md](TEST_CASES.md) — steps for the 11 core cases, which are automated, smoke results.
+- **Report:** [REPORT.md](REPORT.md) — environment, results of the runs, findings, what is not covered yet.
+- **Suite:** `tests/` — 11 Playwright tests, ~3 minutes, serial on one trial account.
 
 ## What is tested and why
 
@@ -62,15 +64,20 @@ Notes:
 ## AI tools used
 
 I work with Claude Code (Anthropic) as a pair: I decide what to test and why, the agent does the legwork, I check
-the result. In this challenge it helped in three places:
+the result. The full list of steps is at the top of [TEST_PLAN.md](TEST_PLAN.md). The split on this task:
 
-1. **Exploration.** I asked it to write short headless Playwright scripts that log in, save / rename / delete a
-   search and print every `/savedSearches` request and response. That gave me the API, the name rules, the
-   `data-testid`s of the tree actions and the silent >50-character failure in about an hour. Then I repeated the
-   main flows by hand in the UI.
-2. **First version of the code.** From my list of checks it wrote the page objects, fixtures and tests, and fixed
-   the three locators that failed on the first run (the counter is rendered as `"2\n assets"`, the panel toggle
-   remembers its state). I reviewed every file and run the suite myself.
-3. **Review of the plan** for gaps against the feature (groups, favourites, broken searches).
+**Me:** read the task, explored the product, chose the feature, corrected and approved the plan, ran the smoke test
+of the core flows by hand, reproduced the bug, reviewed the structure of the autotests, answered the qualifying
+questions myself.
 
-Every finding in `TEST_PLAN.md` was reproduced by hand in the real UI before it was written down.
+**Claude Code:**
+
+1. **Exploration.** Short headless Playwright scripts that log in, save / rename / delete a search and print every
+   `/savedSearches` request and response. That gave the API, the name rules, the `data-testid`s of the tree actions
+   and the silent >50-character failure in about an hour.
+2. **Test cases and code.** From the approved plan it wrote the detailed test cases, the page objects, fixtures and
+   tests, and fixed the three locators that failed on the first run (the counter is rendered as `"2\n assets"`,
+   the panel remembers that it was open).
+3. **Drafts** of the plan and the report, which I then edited.
+
+Where it did not help: the smoke test and the qualifying questions. I did those myself.

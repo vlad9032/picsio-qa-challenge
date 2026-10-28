@@ -2,6 +2,37 @@
 
 Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
 
+## How I worked on this task
+
+1. I read the task in the job post.
+2. I signed up on pics.io, clicked through the product and googled what it is for and who uses it.
+3. I chose the feature. First I looked at the PDF editor, but it is a lot of work and hard to automate. I took the
+   recommended saved searches.
+4. I asked Claude Code to explore the feature and draft a plan.
+5. I corrected and approved the plan.
+6. I asked for detailed test cases and Playwright autotests for the core scenarios ([TEST_CASES.md](TEST_CASES.md),
+   `tests/`).
+7. I ran a smoke test of the feature by hand and went through the main functions myself.
+8. I reproduced the bug that Claude found (SS-BUG-1).
+9. I reviewed the structure of the autotests.
+10. I put together the report ([REPORT.md](REPORT.md)).
+11. I answered the qualifying questions in the job post myself and sent the application.
+
+## Plan in short
+
+- **What:** saved searches. Save a search, open it later, team or personal, rename, delete.
+- **Why:** search is where work with the data starts. Less work than the video player or the PDF editor. Easy to
+  automate.
+- **How:** functional flows, name validation, API, permissions, UI, browsers, performance and security. Details in
+  section 3.
+- **Core:** save and open, team vs personal, rename, delete, live search, name rules, permissions. **Secondary:**
+  groups, broken search, re-save, search in the panel, other browsers.
+- **Automate:** the core flows and the name rules. 11 Playwright tests. **Not automate:** uploads, deleting
+  collections, drag-and-drop, visual checks.
+- **Tools:** Chrome DevTools, curl, Playwright + TypeScript, Claude Code.
+- **Metrics:** pass rate of core scenarios, bugs from users, run time, flaky tests.
+- **Report:** a ticket per bug, a short note per release, decisions to the PM in writing.
+
 ## 1. What I test and why
 
 **Saved searches.** A user runs a search, presses *Save this search*, gives it a name and opens it later from the
@@ -10,16 +41,9 @@ group and marked as favourite. Pics.io also ships about 30 built-in team searche
 *Created today*…).
 
 Why this feature:
-
-- Teams with thousands of files open the library through saved searches every day. If a saved search is wrong,
-  people do not see their files and nobody notices.
-- It touches four parts of the product at once: the search engine, the tree in the left panel, a small REST API
-  and team permissions. If these four work together, a lot of the product works.
-- It is small. I can cover it end to end in a few days and automate it without waiting for video processing.
-  The video player would spend most of the test time waiting for transcoding.
-
-Not in this plan: the video player, drag-and-drop order inside groups, Google Drive / S3 storage details, mobile
-apps.
+- An important feature: data access essentially begins with searching.
+- Less work compared to a video player or PDF editor.
+- Easily automated.
 
 ## 2. How the feature works
 
@@ -140,9 +164,9 @@ change is checked on three levels: UI, request/response, API list.
 
 - Manual: Chrome DevTools (Network tab for `/savedSearches`), curl with the API key for backend rules.
 - Automation: Playwright 1.64 + TypeScript, `dotenv`, HTML report, traces on failure.
-- AI: Claude Code. It wrote the exploration scripts (log in, save, rename, delete, print every request), the first
-  version of the page objects and tests, and reviewed this plan for gaps. I set the scope, checked every flow by
-  hand in the UI and run the suite myself. Details in README.
+- AI: Claude Code. It wrote the exploration scripts (log in, save, rename, delete, print every request), the test
+  cases, the first version of the autotests and the draft of the report. I chose the feature, approved the plan,
+  ran the smoke test by hand, reproduced the bug and reviewed the code. Details in README.
 
 ## 7. Metrics
 
