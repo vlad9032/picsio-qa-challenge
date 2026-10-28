@@ -14,10 +14,15 @@ Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
 8. Check results of autotests and reproduced the bug that Claude found (SS-BUG-1)
 9. Reviewed the structure of the autotests
 10. Noted an improvement
-11. Add some bugs about document editor 
+11. Add some notes about document editor (bug+imp)
 12. Ask to create report and git repository
 13. Double-check completed work
-14. Answer the qualifying questions in the job post and sent the application.
+14. Ask claude to make a nice test plan in Google docs
+15. Answer the qualifying questions in the job post and sent the application.
+
+
+As result - 12 cases on playwright - all pass (1 failed case - SS-bug-1- marker as pass bacause of expected failure, when it will be fixed we will detect and change case)
+
 
 The plan below was drafted by сlaude and approved by me:
 
@@ -190,6 +195,8 @@ change is checked on three levels: UI, request/response, API list.
   characters fail silently. Do we fix the dialog or raise the server limit?"
 
 ## 9. What I found
+
+Full bug reports with steps, actual and expected result: [BUGS.md](BUGS.md).
 
 | Id | Severity | Finding | Evidence |
 |---|---|---|---|
