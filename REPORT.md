@@ -16,7 +16,7 @@ Vladyslav Hryhorian · 28 October 2026
 | Test plan | [TEST_PLAN.md](TEST_PLAN.md) | done, approved |
 | Test cases for the core scenarios | [TEST_CASES.md](TEST_CASES.md), 11 cases | done |
 | Autotests | `tests/`, 12 tests | done, green |
-| Smoke test by hand | TEST_CASES.md, column *Smoke by hand* | in progress |
+| Smoke test by hand | TEST_CASES.md, column *Smoke by hand* | done |
 
 ## Results
 
@@ -29,9 +29,16 @@ all `QA-auto …` items; the team library has no leftovers.
 
 | Case | Result |
 |---|---|
+| TC-01 save a team search and open it | PASS |
+| TC-02 save a personal search | PASS |
+| TC-03 save a search with filters only | PASS |
+| TC-04 empty name | PASS |
 | TC-05 duplicate name | PASS |
 | TC-06 name > 50 characters | BUG reproduced (SS-BUG-1) |
-| TC-01, 02, 03, 04, 07, 08, 09, 10 | pending |
+| TC-07 rename from the tree | PASS |
+| TC-08 delete from the tree | PASS |
+| TC-09 live search after upload | not run (needs upload and indexing) |
+| TC-10 team vs personal for a teammate | covered by the autotest |
 
 ## Findings
 

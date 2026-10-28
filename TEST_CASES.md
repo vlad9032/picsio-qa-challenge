@@ -11,7 +11,7 @@ Setup for all cases: log in, open *My team library*, type `guide` in the top sea
 ### TC-01 · Save a team search and open it (F1)
 
 Automated: `saved-searches.spec.ts › a search from the search bar is saved as a team search…`
-Smoke by hand: pending
+Smoke by hand: **PASS** (28.10.2026)
 
 1. In the filter bar press *Save this search*.
 2. Name: `Guide docs`. Leave *Share with my team* on. Press *Ok*.
@@ -27,7 +27,7 @@ under *Personal*; after step 5 the search bar shows `guide` and **2 assets** aga
 ### TC-02 · Save a personal search (F2)
 
 Automated: `saved-searches.spec.ts › with "Share with my team" unchecked…`
-Smoke by hand: pending
+Smoke by hand: **PASS** (28.10.2026)
 
 1. Press *Save this search*.
 2. Name: `My personal guide`. Uncheck *Share with my team*. Press *Ok*.
@@ -40,7 +40,7 @@ Expected: the item is under *Personal Saved Searches* and not under *Team*. A te
 ### TC-03 · Save a search with filters only (F3)
 
 Automated: no (secondary for automation, core for manual)
-Smoke by hand: pending
+Smoke by hand: **PASS** (28.10.2026)
 
 1. Clear the search bar.
 2. In the filter bar choose *Type* → *PDF*.
@@ -54,7 +54,7 @@ Expected: the *Type = PDF* filter is back and the same files are shown.
 ### TC-04 · Empty name (V1)
 
 Automated: `saved-searches.spec.ts › Ok stays disabled for an empty or whitespace-only name`
-Smoke by hand: pending
+Smoke by hand: **PASS** (28.10.2026)
 
 1. Press *Save this search*.
 2. Leave the name empty. Look at *Ok*.
@@ -99,7 +99,7 @@ Actual: the dialog closes, no message, the item is not created. Network shows `P
 ### TC-07 · Rename from the tree (F5)
 
 Automated: `saved-searches.spec.ts › rename from the tree updates the item…`
-Smoke by hand: pending
+Smoke by hand: **PASS** (28.10.2026)
 
 1. Open the *Search* panel. Hover `Guide docs`.
 2. Press the pencil (*Rename saved search*).
@@ -115,7 +115,7 @@ step 5 — the name stays as it was.
 ### TC-08 · Delete from the tree (F6)
 
 Automated: `saved-searches.spec.ts › delete asks for confirmation and removes the search…`
-Smoke by hand: pending
+Smoke by hand: **PASS** (28.10.2026)
 
 1. Hover `Guide docs renamed`. Press the trash (*Delete saved search*).
 2. In *Delete saved search?* press *Cancel*.
@@ -144,8 +144,8 @@ Expected: step 3 — the number of files is one more; step 4 — back to the ori
 ### TC-10 · Team vs personal for a teammate (permissions)
 
 Automated: `saved-searches.spec.ts › a teammate sees my team search and does not see my personal search`
-(second browser session with the teammate's own login)
-Smoke by hand: pending
+(second browser session with the teammate's own login) — PASS
+Smoke by hand: not repeated, covered by the autotest
 
 1. Log in as the teammate (invited with the *admin* role in this trial team).
 2. Open the *Search* panel.
