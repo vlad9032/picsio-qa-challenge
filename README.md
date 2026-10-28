@@ -6,7 +6,7 @@ Test plan + Playwright (TypeScript) suite for the **Saved searches** feature of 
   what I cover by aspect, what I automate and what I leave manual, metrics, and the defects found.
 - **Test cases:** [TEST_CASES.md](TEST_CASES.md) — steps for the 11 core cases, which are automated, smoke results.
 - **Report:** [REPORT.md](REPORT.md) — environment, results of the runs, findings, what is not covered yet.
-- **Suite:** `tests/` — 11 Playwright tests, ~3 minutes, serial on one trial account.
+- **Suite:** `tests/` — 12 Playwright tests, ~3 minutes, serial on one trial team (owner + one invited teammate).
 
 ## What is tested and why
 
@@ -16,7 +16,7 @@ covers the journeys that must never break and the name rules the dialog relies o
 
 | File | Tests |
 |---|---|
-| `tests/saved-searches.spec.ts` | create a team search and reopen it (same query, same asset count); create a personal search; name validation in the dialog (empty, duplicate incl. built-ins, >50 characters — documented defect); rename and delete from the tree |
+| `tests/saved-searches.spec.ts` | create a team search and reopen it (same query, same asset count); create a personal search; name validation in the dialog (empty, duplicate incl. built-ins, >50 characters — documented defect); a teammate sees the team search and not the personal one (second account); rename and delete from the tree |
 | `tests/saved-searches.api.spec.ts` | server rules through the REST API: 50/51 characters, empty/HTML names, duplicate → 409, create → list → delete |
 
 Every mutation is checked on three levels: what the user sees, the request/response the UI sent, and the state the
@@ -60,6 +60,11 @@ Notes:
 - The suite runs serially (`workers: 1`): one account, one shared tree. Names are unique per run, so parallel
   runs on separate accounts are safe.
 - Built-in saved searches (*Video*, *Duplicates*…) are never touched; cleanup only removes `QA-auto …` items.
+- The permission test needs a second account invited to the same team (`PICSIO_TEAMMATE_EMAIL` / `PICSIO_TEAMMATE_PASS`).
+  Without it the test is skipped, the rest of the suite runs.
+- One test, `a name longer than 50 characters…`, is marked `test.fail()`: it fails on purpose because of SS-BUG-1,
+  so the report counts it as passed ("expected failure"). When the bug is fixed it will start to fail, and the
+  mark should be removed.
 
 ## AI tools used
 

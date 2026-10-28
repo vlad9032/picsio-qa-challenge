@@ -30,7 +30,7 @@ The plan below was drafted by сlaude and approved by me:
   section 3.
 - **Core:** save and open, team vs personal, rename, delete, live search, name rules, permissions. **Secondary:**
   groups, broken search, re-save, search in the panel, other browsers.
-- **Automate:** the core flows (save, open, rename, delete) and the name rules. 11 Playwright tests. **Not automate:** the live search after upload (F7), the broken search after a collection is deleted (F8), drag-and-drop, visual checks.
+- **Automate:** the core flows (save, open, rename, delete), team vs personal for a teammate, and the name rules. 12 Playwright tests. **Not automate:** the live search after upload (F7), the broken search after a collection is deleted (F8), drag-and-drop, visual checks.
 - **Tools:** Chrome DevTools, curl, Playwright + TypeScript, Claude Code.
 - **Metrics:** pass rate of core scenarios, bugs from users, run time, flaky tests.
 - **Report:** a ticket per bug, a short note per release, decisions to the PM in writing.
@@ -149,6 +149,8 @@ Automated in this repository (Playwright, TypeScript):
   `DELETE …`).
 - **API name rules.** 50/51 characters, empty and HTML names, duplicate → 409, create → list → delete. The dialog
   depends on these rules. They run in seconds and catch backend changes even when the UI hides them.
+- **Team vs personal for a teammate.** A second browser session with the invited teammate's own login: the team
+  search is in their tree, my personal search is not.
 
 Not automated on purpose:
 
@@ -157,7 +159,7 @@ Not automated on purpose:
   broken search. Possible, but secondary; I keep the suite small.
 - Groups, favourites, drag-and-drop. Low value, high maintenance.
 - Other browsers and layout. Manual with screenshots.
-- Permissions. Needs a second account. I will add it with a second `storageState` once the invite is confirmed.
+- Role rules (what a *guest* may rename or delete). Needs a guest account and a role matrix first.
 
 Design: every test creates its own `QA-auto <run id> …` item. An API fixture deletes all `QA-auto` items after
 each test, so a crashed run leaves nothing behind. Page objects for the search bar, the dialog and the tree. Every
@@ -175,7 +177,7 @@ change is checked on three levels: UI, request/response, API list.
 
 - Pass rate of core scenarios per release. Target 100 %. A red build blocks the release of the search area.
 - Bugs in saved searches found by users per quarter. Target 0 Critical/Major.
-- Suite run time. Now about 3 minutes for 11 tests. Keep it under 5.
+- Suite run time. Now about 3 minutes for 12 tests. Keep it under 5.
 - Flaky tests: reruns needed per 20 runs. Target 0. A flaky test is fixed or quarantined within a sprint.
 - Time to open a saved search on a 10 000-file library: not slower than the same query typed by hand (+10 %).
 
@@ -195,10 +197,3 @@ change is checked on three levels: UI, request/response, API list.
 | SS-OBS-1 | Minor | `POST /savedSearches` without `data` is accepted (201). The item then opens as "all files". API only. | curl, section 3.3 |
 | SS-OBS-2 | Minor | Validation errors are raw strings from the validator. If the UI ever shows server errors, users will read `child "body" fails because …`. | API tests |
 | SS-IMP-1 | Improvement | The *Save to* tree in the dialog shows only groups, not the searches already saved in them. So you learn that a name is taken only after you type it. Showing the existing searches in grey under each group would help pick a free name. | Found while saving a search by hand, `evidence/saved-search-duplicate-name.png` |
-
-Found by hand outside the saved-searches scope, while exploring the product:
-
-| Id | Severity | Finding | Evidence |
-|---|---|---|---|
-| PDF-OBS-1 | Minor, third-party | *Edit* on a PDF opens the embedded Photopea editor. The text is converted with other fonts: lines wrap differently and some icons become `�`. Visible when you zoom in. The cause is the PDF import in Photopea, not Pics.io, but the user sees a "damaged" document. | `evidence/pdf-editor-text-after-zoom.png` |
-| PDF-IMP-1 | Improvement | Pics.io warns that an edited PDF cannot be saved back and must be downloaded and uploaded as a revision. After that, *File → Save* in the editor does nothing and says nothing; a user who skipped the warning loses the edit. Better: repeat the message on *Save* or disable *Save* for PDF. | `evidence/pdf-editor-warning.png`; reproduced by hand |

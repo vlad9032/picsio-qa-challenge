@@ -143,14 +143,15 @@ Expected: step 3 — the number of files is one more; step 4 — back to the ori
 
 ### TC-10 · Team vs personal for a teammate (permissions)
 
-Automated: not yet (second account)
-Smoke by hand: pending (invite sent to the second account)
+Automated: `saved-searches.spec.ts › a teammate sees my team search and does not see my personal search`
+(second browser session with the teammate's own login)
+Smoke by hand: pending
 
-1. Log in as the teammate (role *guest*).
+1. Log in as the teammate (invited with the *admin* role in this trial team).
 2. Open the *Search* panel.
 
-Expected: `Guide docs` (team) is visible; `My personal guide` of the owner is not visible. A guest cannot rename or
-delete a team search made by the owner unless the role allows it.
+Expected: `Guide docs` (team) is visible; `My personal guide` of the owner is not visible. Not automated: a *guest*
+cannot rename or delete a team search made by the owner unless the role allows it.
 
 ---
 
