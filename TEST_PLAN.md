@@ -2,21 +2,24 @@
 
 Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
 
-## How I worked on this task
+My workflow on this task
 
-1. I read the task in the job post.
-2. I signed up on pics.io, clicked through the product and googled what it is for and who uses it.
-3. I chose the feature. First I looked at the PDF editor, but it is a lot of work and hard to automate. I took the
-   recommended saved searches.
-4. I asked Claude Code to explore the feature and draft a plan.
-5. I corrected and approved the plan.
-6. I asked for detailed test cases and Playwright autotests for the core scenarios ([TEST_CASES.md](TEST_CASES.md),
-   `tests/`).
-7. I ran a smoke test of the feature by hand and went through the main functions myself.
-8. I reproduced the bug that Claude found (SS-BUG-1).
-9. I reviewed the structure of the autotests.
-10. I put together the report ([REPORT.md](REPORT.md)).
-11. I answered the qualifying questions in the job post myself and sent the application.
+1. I read the task in the job post
+2. Visited the website, registered, explored the features and check what is a product or and who uses it
+3. Selected the functionality for the test task (I initially considered the document editor, but it was too much work and had complex automation) and chose the recommended "saved search"
+4. Ask Claude Code to explore the feature and draft a plan
+5. Made adjustments, approved the plan
+6. Asked for detailed test cases and Playwright autotests for the core scenarios
+7. Ran smoke test of the feature by hand and went through the main functions myself
+8. Check results of autotests and reproduced the bug that Claude found (SS-BUG-1)
+9. Reviewed the structure of the autotests
+10. Noted an improvement
+11. Add some bugs about document editor 
+12. Ask to create report and git repository
+13. Double-check completed work
+14. Answer the qualifying questions in the job post and sent the application.
+
+Futher plan created by Claude:
 
 ## Plan in short
 
