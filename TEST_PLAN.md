@@ -27,7 +27,7 @@ Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
   section 3.
 - **Core:** save and open, team vs personal, rename, delete, live search, name rules, permissions. **Secondary:**
   groups, broken search, re-save, search in the panel, other browsers.
-- **Automate:** the core flows and the name rules. 11 Playwright tests. **Not automate:** uploads, deleting collections, drag-and-drop, visual checks.
+- **Automate:** the core flows (save, open, rename, delete) and the name rules. 11 Playwright tests. **Not automate:** the live search after upload (F7), the broken search after a collection is deleted (F8), drag-and-drop, visual checks.
 - **Tools:** Chrome DevTools, curl, Playwright + TypeScript, Claude Code.
 - **Metrics:** pass rate of core scenarios, bugs from users, run time, flaky tests.
 - **Report:** a ticket per bug, a short note per release, decisions to the PM in writing.
@@ -150,7 +150,8 @@ Automated in this repository (Playwright, TypeScript):
 Not automated on purpose:
 
 - F7 needs uploads and indexing. Slow and flaky.
-- F8 deletes collections. Too destructive for a shared test account.
+- F8 (a saved search whose collection was deleted) needs a throwaway collection and a check of how the UI marks a
+  broken search. Possible, but secondary; I keep the suite small.
 - Groups, favourites, drag-and-drop. Low value, high maintenance.
 - Other browsers and layout. Manual with screenshots.
 - Permissions. Needs a second account. I will add it with a second `storageState` once the invite is confirmed.
