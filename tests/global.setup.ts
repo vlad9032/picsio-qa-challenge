@@ -1,35 +1,48 @@
-import { chromium } from '@playwright/test';
+import { Browser, chromium } from '@playwright/test';
 import fs from 'fs';
 import 'dotenv/config';
 
-const AUTH_FILE = 'auth/user.json';
+export const OWNER_AUTH = 'auth/user.json';
+export const TEAMMATE_AUTH = 'auth/teammate.json';
 
 /**
- * Logs in once with email + password and stores the session for all tests.
- * Google SSO is not automatable, so the trial account has a password set in "My account".
+ * Logs in once per account with email + password and stores the session for the tests.
+ * Google SSO is not automatable, so the trial accounts have a password set in "My account".
+ * The teammate account is optional: without PICSIO_TEAMMATE_* the permission test is skipped.
  */
 export default async function globalSetup() {
-  const { PICSIO_EMAIL, PICSIO_PASS, PICSIO_API_KEY } = process.env;
+  const { PICSIO_EMAIL, PICSIO_PASS, PICSIO_API_KEY, PICSIO_TEAMMATE_EMAIL, PICSIO_TEAMMATE_PASS } = process.env;
   if (!PICSIO_EMAIL || !PICSIO_PASS || !PICSIO_API_KEY) {
     throw new Error('Set PICSIO_EMAIL, PICSIO_PASS and PICSIO_API_KEY in .env (see .env.example)');
   }
   fs.mkdirSync('auth', { recursive: true });
 
   const browser = await chromium.launch();
-  const page = await browser.newPage();
+  await login(browser, PICSIO_EMAIL, PICSIO_PASS, OWNER_AUTH);
+  if (PICSIO_TEAMMATE_EMAIL && PICSIO_TEAMMATE_PASS) {
+    await login(browser, PICSIO_TEAMMATE_EMAIL, PICSIO_TEAMMATE_PASS, TEAMMATE_AUTH);
+  } else if (fs.existsSync(TEAMMATE_AUTH)) {
+    fs.unlinkSync(TEAMMATE_AUTH); // no stale session from a previous run
+  }
+  await browser.close();
+}
+
+async function login(browser: Browser, email: string, password: string, file: string) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
   await page.goto('https://pics.io/login');
   const cookies = page.getByRole('button', { name: /accept all/i });
   if (await cookies.isVisible().catch(() => false)) await cookies.click();
-  await page.getByLabel(/email/i).first().fill(PICSIO_EMAIL);
-  await page.locator('input[type="password"]').fill(PICSIO_PASS);
+  await page.getByLabel(/email/i).first().fill(email);
+  await page.locator('input[type="password"]').fill(password);
   await page.getByRole('button', { name: /^log in$/i }).last().click();
   // A wrong password keeps the form on /login with an inline error; a good one redirects to /search.
   await Promise.race([
     page.waitForURL(/\/search/, { timeout: 30_000 }),
     page.getByText('Login or password is invalid').waitFor({ timeout: 30_000 }).then(() => {
-      throw new Error('Pics.io login failed: login or password is invalid');
+      throw new Error(`Pics.io login failed for ${email}: login or password is invalid`);
     }),
   ]);
-  await page.context().storageState({ path: AUTH_FILE });
-  await browser.close();
+  await context.storageState({ path: file });
+  await context.close();
 }

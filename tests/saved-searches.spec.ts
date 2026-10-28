@@ -1,4 +1,7 @@
+import fs from 'fs';
 import { test, expect } from './fixtures';
+import { TEAMMATE_AUTH } from './global.setup';
+import { SavedSearchesTree } from './pages/saved-searches-tree.page';
 
 /**
  * Saved searches — UI flows a user actually goes through.
@@ -95,6 +98,29 @@ test.describe('Saved searches: name validation in the dialog', () => {
     expect(res.status()).toBe(400);
     await expect(page.getByText(/50 characters|too long/i)).toBeVisible();
     expect(await api.findByName(name)).toBeUndefined();
+  });
+});
+
+test.describe('Saved searches: team vs personal for a teammate', () => {
+  test('a teammate sees my team search and does not see my personal search', async ({ browser, api, uniqueName }) => {
+    test.skip(!fs.existsSync(TEAMMATE_AUTH), 'needs PICSIO_TEAMMATE_EMAIL / PICSIO_TEAMMATE_PASS in .env');
+    const teamName = uniqueName('team visible');
+    const personalName = uniqueName('personal hidden');
+    await api.create(teamName, 'guide', true);
+    await api.create(personalName, 'guide', false);
+
+    // Second browser session: the invited teammate (admin role in this trial team).
+    const context = await browser.newContext({ storageState: TEAMMATE_AUTH });
+    const page = await context.newPage();
+    const tree = new SavedSearchesTree(page);
+    await page.goto('/search');
+    await tree.open();
+
+    await expect(tree.item(teamName).name).toBeVisible();
+    expect(await tree.namesIn('team')).toContain(teamName);
+    expect(await tree.namesIn('team')).not.toContain(personalName);
+    expect(await tree.namesIn('personal')).not.toContain(personalName);
+    await context.close();
   });
 });
 

@@ -2,10 +2,10 @@
 
 Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
 
-My workflow on this task
+## My workflow on this task
 
 1. I read the task in the job post
-2. Visited the website, registered, explored the features and check what is a product or and who uses it
+2. Visited the website, registered, explored the features and check what a product is and who uses it
 3. Selected the functionality for the test task (I initially considered the document editor, but it was too much work and had complex automation) and chose the recommended "saved search"
 4. Ask Claude Code to explore the feature and draft a plan
 5. Made adjustments, approved the plan
@@ -19,7 +19,7 @@ My workflow on this task
 13. Double-check completed work
 14. Answer the qualifying questions in the job post and sent the application.
 
-Futher plan created by Claude:
+The plan below was drafted by сlaude and approved by me:
 
 ## Plan in short
 
