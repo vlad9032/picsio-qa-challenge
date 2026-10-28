@@ -44,6 +44,16 @@ all `QA-auto …` items; the team library has no leftovers.
 
 Details and evidence: TEST_PLAN.md, section 9, and the `evidence/` folder.
 
+### Found by hand outside the scope: PDF editor
+
+While exploring the product I also tried *Edit* on a PDF (the built-in editor is the embedded Photopea). Not
+automated, no Playwright evidence: these are manual observations, reproduced twice.
+
+| Id | Severity | Finding | How to see it |
+|---|---|---|---|
+| PDF-OBS-1 | Minor, third-party | After *Edit* on a PDF the text is re-rendered with other fonts: lines wrap differently and some icons turn into `�`. Clear when you zoom in. The cause is the PDF import in Photopea, not Pics.io, but the user sees a "damaged" document. | Preview a PDF → *Edit* → zoom in on a page |
+| PDF-IMP-1 | Improvement | An edited PDF cannot be saved back. Pics.io shows a warning about it when the editor opens, but the warning has a *Do not show again* checkbox, and after that *File → Save* in the editor does nothing and says nothing. A user who ticked the checkbox once loses the edit silently. Better: repeat the message on *Save* or disable *Save* for PDF. | *Edit* a PDF → change something → *File → Save* → reload: no new revision. The warning flag is `editorDontShowAlertForExtensions` in localStorage |
+
 ## Not covered yet, next steps
 
 - Permissions with the second account (TC-10) and the automated version with a second `storageState`.
