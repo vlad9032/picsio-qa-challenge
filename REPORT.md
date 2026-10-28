@@ -42,6 +42,8 @@ all `QA-auto …` items; the team library has no leftovers.
 
 ## Findings
 
+Full bug reports (steps, actual and expected result): [BUGS.md](BUGS.md).
+
 | Id | Severity | Short |
 |---|---|---|
 | SS-BUG-1 | Major | Name > 50 characters: dialog closes, no message, nothing saved. Server 400, UI shows nothing |

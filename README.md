@@ -6,6 +6,7 @@ Test plan + Playwright (TypeScript) suite for the **Saved searches** feature of 
   what I cover by aspect, what I automate and what I leave manual, metrics, and the defects found.
 - **Test cases:** [TEST_CASES.md](TEST_CASES.md) — steps for the 11 core cases, which are automated, smoke results.
 - **Report:** [REPORT.md](REPORT.md) — environment, results of the runs, findings, what is not covered yet.
+- **Bug reports:** [BUGS.md](BUGS.md) — every finding with steps, actual and expected result.
 - **Suite:** `tests/` — 12 Playwright tests, ~3 minutes, serial on one trial team (owner + one invited teammate).
 
 ## What is tested and why
