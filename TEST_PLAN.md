@@ -25,7 +25,7 @@ As result - 12 cases on playwright - all pass (1 failed case - SS-bug-1- marker 
 
 Bugs in the end of the document
 
-The plan below was drafted by сlaude and approved by me:
+The plan below was drafted by claude and approved by me:
 
 ## Plan in short
 
