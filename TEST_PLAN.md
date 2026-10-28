@@ -27,8 +27,7 @@ Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
   section 3.
 - **Core:** save and open, team vs personal, rename, delete, live search, name rules, permissions. **Secondary:**
   groups, broken search, re-save, search in the panel, other browsers.
-- **Automate:** the core flows and the name rules. 11 Playwright tests. **Not automate:** uploads, deleting
-  collections, drag-and-drop, visual checks.
+- **Automate:** the core flows and the name rules. 11 Playwright tests. **Not automate:** uploads, deleting collections, drag-and-drop, visual checks.
 - **Tools:** Chrome DevTools, curl, Playwright + TypeScript, Claude Code.
 - **Metrics:** pass rate of core scenarios, bugs from users, run time, flaky tests.
 - **Report:** a ticket per bug, a short note per release, decisions to the PM in writing.
