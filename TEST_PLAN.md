@@ -1,160 +1,170 @@
 # Test plan: Saved searches in Pics.io
 
-Author: Vladyslav Hryhorian · October 2026 · Pics.io trial team "My team library" (web app, Chrome)
+Vladyslav Hryhorian · October 2026 · Pics.io trial team, web app in Chrome
 
-## 1. What I am testing and why
+## 1. What I test and why
 
-**Saved searches**: a user runs a search (text and/or filters), presses *Save this search*, names it, picks a
-group and whether it is shared with the team, and later reopens it from the *Saved searches* panel. Items can be
-renamed, deleted, moved to groups and added to favourites. Pics.io also ships ~30 built-in team searches
-(*Video*, *Duplicates*, *Created today*…).
+**Saved searches.** A user runs a search, presses *Save this search*, gives it a name and opens it later from the
+left panel. A saved search can be shared with the team or stay personal. It can be renamed, deleted, moved to a
+group and marked as favourite. Pics.io also ships about 30 built-in team searches (*Video*, *Duplicates*,
+*Created today*…).
 
 Why this feature:
 
-- It is the daily entry point to the library for a team that has thousands of assets: a broken or wrong saved
-  search silently hides assets from people. Risk is high, visibility is low.
-- It touches four layers at once: the search engine (query is stored, not the result), the tree UI, a small REST
-  API (`/savedSearches`) and team permissions (team vs personal). That is a good proxy for how the whole product
-  behaves.
-- It is small enough to cover end to end in a few days and to automate honestly, without waiting for media
-  transcoding (the video player would spend most of its test time waiting on processing).
+- Teams with thousands of files open the library through saved searches every day. If a saved search is wrong,
+  people do not see their files and nobody notices.
+- It touches four parts of the product at once: the search engine, the tree in the left panel, a small REST API
+  and team permissions. If these four work together, a lot of the product works.
+- It is small. I can cover it end to end in a few days and automate it without waiting for video processing.
+  The video player would spend most of the test time waiting for transcoding.
 
-Out of scope: the video player, *Move to group* drag-and-drop ordering, Google Drive / S3 storage specifics,
-mobile apps.
+Not in this plan: the video player, drag-and-drop order inside groups, Google Drive / S3 storage details, mobile
+apps.
 
-## 2. How the feature works (what I learned while exploring)
+## 2. How the feature works
 
-| Action | UI | API the UI calls |
+I explored it by hand and with short scripts that logged every request the web app sends.
+
+| Action | Where in the UI | Request |
 |---|---|---|
-| Save a search | filter bar → *Save this search* → dialog *Create saved search* (name, *Save to* tree, *Share with my team*, default on) | `POST /savedSearches` `{name, data:{collectionIds, text, …}, shared}` → 201 |
-| List | left rail *Search* → panel with *Team Saved Searches* and *Personal Saved Searches* | `GET /savedSearches` (`teamId` present = team search) |
-| Open | click the item; the stored query is re-run, the URL gets the same parameters | `POST /images/search`, `POST /savedSearches/checkSearchValidity` → `{broken}` |
-| Rename | hover → pencil → inline input → Enter | `PUT /savedSearches/:id/rename` |
-| Delete | hover → trash → confirm *Delete saved search?* | `DELETE /savedSearches/:id` |
-| Group / favourite | hover → *Move to group*, *Add to favorites* | not covered here |
+| Save a search | filter bar → *Save this search* → dialog *Create saved search*: name, *Save to* (group), *Share with my team* (on by default) | `POST /savedSearches` `{name, data: {collectionIds, text, …}, shared}` → 201 |
+| See the list | left rail → *Search* icon → panel with *Team Saved Searches* and *Personal Saved Searches* | `GET /savedSearches` (`teamId` present = team search) |
+| Open one | click the item: the saved query runs again, the URL gets the same parameters | `POST /images/search`, `POST /savedSearches/checkSearchValidity` → `{broken}` |
+| Rename | hover → pencil → the name becomes an input → Enter | `PUT /savedSearches/:id/rename` |
+| Delete | hover → trash → *Delete saved search?* → *Delete* | `DELETE /savedSearches/:id` |
+| Group, favourite | hover → *Move to group*, *Add to favorites* | not covered in this plan |
 
-Name rules found: 1–50 characters after trimming, unique inside its location (case-insensitive, built-in names
-count), HTML tags rejected. The dialog validates "empty" and "duplicate" before submit; it does **not** validate
-length.
+Name rules I found: 1 to 50 characters, unique inside its group (letter case does not matter, built-in names count
+too), HTML tags are rejected. The dialog checks "empty" and "duplicate" before submit. It does not check the length
+(see SS-BUG-1).
 
-## 3. Test coverage by aspect
+## 3. What I cover and how
 
-### 3.1 Functional (core)
+### 3.1 Functional
 
 | # | Scenario | Priority |
 |---|---|---|
-| F1 | Save a text search as a team search → it appears under *Team*, reopening it returns the same assets | Core |
-| F2 | Save with *Share with my team* off → under *Personal*, not visible to a teammate | Core |
-| F3 | Save a search with filters only (type = video, keyword, rating), no text → filters restored on open | Core |
-| F4 | Save inside a group (*Save to* → group) → item nested; same name allowed in a different group | Secondary |
-| F5 | Rename (valid, duplicate, empty, Esc cancels) | Core |
-| F6 | Delete: confirm removes it; *Cancel* keeps it; built-in searches cannot be deleted | Core |
-| F7 | A saved search is live: upload an asset that matches → it shows up; delete the asset → it disappears | Core |
-| F8 | Search bound to a collection that is later deleted → `checkSearchValidity` reports `broken`, UI marks it | Secondary |
-| F9 | Open a saved search, change the query, press *Save this search* again → new item, old one unchanged | Secondary |
+| F1 | Save a text search as a team search. It appears under *Team*. Open it: same query, same files | Core |
+| F2 | Save with *Share with my team* off. It appears under *Personal*. A teammate does not see it | Core |
+| F3 | Save a search with filters only (type = video, keyword, rating) and no text. Open it: the filters are back | Core |
+| F4 | Save into a group. The item is nested. The same name is allowed in another group | Secondary |
+| F5 | Rename: valid name, duplicate, empty, Esc cancels | Core |
+| F6 | Delete: *Delete* removes it, *Cancel* keeps it. Built-in searches cannot be deleted | Core |
+| F7 | A saved search is live. Upload a file that matches: it shows up. Delete the file: it is gone | Core |
+| F8 | The search points to a collection. Delete the collection. `checkSearchValidity` says `broken` and the UI marks it | Secondary |
+| F9 | Open a saved search, change the query, save again. A new item appears, the old one does not change | Secondary |
 | F10 | *Search in saved searches* box filters the panel by name | Secondary |
 
 ### 3.2 Validation and edge cases
 
 | # | Scenario |
 |---|---|
-| V1 | Empty / whitespace-only name → *Ok* disabled |
-| V2 | Duplicate name, any letter case, including a built-in name → inline message, *Ok* disabled |
-| V3 | 50 characters accepted, 51 rejected; what the user sees (see SS-BUG-1) |
-| V4 | Unicode and emoji names, leading/trailing spaces (trimmed?), name made only of HTML tags |
-| V5 | Very long query text (2 000+ chars) and special characters (`"`, `*`, `:`) in the saved query |
-| V6 | Same name as a personal search when saving a team search (different location → allowed?) |
+| V1 | Empty name or spaces only: *Ok* is disabled |
+| V2 | Duplicate name in any letter case, including a built-in name: message under the field, *Ok* is disabled |
+| V3 | 50 characters are accepted, 51 are not. What does the user see? (SS-BUG-1: nothing) |
+| V4 | Unicode and emoji in the name. Spaces at the start and end (trimmed?). A name made only of HTML tags |
+| V5 | Very long query text (2 000+ characters). Special characters in the query: `"`, `*`, `:` |
+| V6 | A personal search and a team search with the same name: different place, so it should be allowed |
 
-### 3.3 API and networking
+### 3.3 API and network
 
-- Status codes and bodies for create (201 / 400 / 409), rename, delete, list; error `msg` is a raw Joi
-  validation string (`child "body" fails because …`) — fine for developers, not for the UI.
-- The API key (My account → API key) works as a Bearer token on the same endpoints the web app uses, so setup
-  and cleanup in automation go through the API, not the UI.
-- `data` is not validated server-side: `POST /savedSearches {name}` without `data` returns 201 and the item opens
-  as "all assets" (low risk, API only).
-- Behaviour on a dropped connection while saving (dialog state, duplicate submit on retry).
+- Status codes and bodies: create 201 / 400 / 409, rename, delete, list.
+- Error messages from the server are raw validation strings (`child "body" fails because …`). Fine for
+  developers, not for users (SS-OBS-2).
+- The API key from *My account* works as a Bearer token on the same endpoints the web app uses. So test setup and
+  cleanup go through the API, not through the UI.
+- `data` is not checked by the server: `POST /savedSearches {name}` without `data` returns 201, and the item opens
+  as "all files" (SS-OBS-1, low risk, API only).
+- What happens when the connection drops while saving: dialog state, double submit on retry.
 
 ### 3.4 Permissions and team
 
-- Teammate with the *guest* role: sees team searches, cannot see the owner's personal ones; can/cannot create
-  team searches (role permission) — check both the UI and a direct API call.
-- Deleting a team search made by someone else; renaming it; what the other user sees without reload
-  (real-time update vs stale tree).
+- A teammate with the *guest* role sees team searches and does not see my personal ones.
+- Can a guest create a team search? Check the UI and a direct API call with the guest's key.
+- Delete or rename a team search made by someone else. What does the other user see without reload: live update
+  or an old tree?
 
-### 3.5 UI / UX
+### 3.5 UI and UX
 
-- Long names in the tree (ellipsis, tooltip with the full name), 100+ items (scroll, performance of the panel).
-- Keyboard: Enter / Esc in the dialog and in inline rename; focus returns to the tree after rename.
-- Toast *"X" added to "Saved searches"* and the dialog closing only after a 2xx.
+- Long names in the tree: cut with "…"? Tooltip with the full name? 100+ items: scroll and speed of the panel.
+- Keyboard: Enter and Esc in the dialog and in the inline rename. Focus goes back to the tree after rename.
+- The toast *"X" added to "Saved searches"* and the dialog closing only after the server says 2xx.
 
-### 3.6 Cross-browser / device
+### 3.6 Browsers and devices
 
-- Chrome (primary), Firefox, Safari on macOS; the tree and the dialog at 1280 px and at a narrow window where
-  the left panel collapses. Mobile-adapted layout: hover actions have no hover on touch — are they reachable?
+- Chrome first, then Firefox and Safari on macOS.
+- The tree and the dialog at 1280 px and in a narrow window where the left panel collapses.
+- Touch screens: the item actions appear on hover. On a tablet there is no hover. Are they reachable?
 
 ### 3.7 Performance and security
 
-- Opening a saved search on a large library: time to first result vs the same query typed by hand (should be
-  equal: it is the same `/images/search` call).
-- A personal search id of another user: `GET/PUT/DELETE /savedSearches/:id` must be refused (IDOR check).
-- HTML in names is rejected by the server; check the tree and the toast render names as text, not markup.
+- Open a saved search on a big library. Time to first result should be the same as typing the query by hand: it is
+  the same `/images/search` call.
+- Take the id of another user's personal search. `GET`, `PUT`, `DELETE /savedSearches/:id` must be refused.
+- The server rejects HTML in names. The tree and the toast must still show names as text, never as markup.
 
 ## 4. Priorities
 
-Core (every release, automated where marked): F1, F2, F5, F6, F7, V1, V2, V3, permissions.
-Secondary (on change in the area, manual): F3, F4, F8, F9, F10, V4–V6, UI/UX, cross-browser, performance.
+Core: F1, F2, F3, F5, F6, F7, V1, V2, V3 and the permission checks. They run on every release.
+Secondary: F4, F8, F9, F10, V4–V6, UI/UX, other browsers, performance. They run when this area changes.
 
-## 5. What is worth automating and why
+How I decide: first, can the user lose files or see someone else's? Second, how often is the flow used? Third,
+how cheap is the check?
+
+## 5. What I automate and why
 
 Automated in this repository (Playwright, TypeScript):
 
-- **F1, F2** — the two user journeys that must always work; they also verify the stored request body and the
-  server state through the API, so a UI test fails for the right reason.
-- **V1, V2, V3** — cheap, deterministic, and V3 documents a real defect as an expected failure (`test.fail`)
-  so the suite turns red the day it is fixed and the annotation can be removed.
-- **F5, F6** — rename and delete from the tree: short flows with clear network evidence (`PUT …/rename`,
+- **F1, F2.** The two flows that must always work. The tests check the UI, the request body and the server state
+  through the API, so a failure points at the real cause.
+- **V1, V2, V3.** Cheap and stable. V3 is a real defect, so the test is marked as an expected failure
+  (`test.fail`). The day the bug is fixed the suite turns red and the mark is removed.
+- **F5, F6.** Rename and delete from the tree. Short flows with clear network evidence (`PUT …/rename`,
   `DELETE …`).
-- **API rules** — 50/51 characters, empty/HTML names, duplicate 409, create→list→delete round trip. These are the
-  rules the dialog depends on; they run in seconds and catch backend regressions even when the UI hides them.
+- **API name rules.** 50/51 characters, empty and HTML names, duplicate → 409, create → list → delete. The dialog
+  depends on these rules. They run in seconds and catch backend changes even when the UI hides them.
 
-Deliberately not automated: F7 (needs uploads + indexing wait: slow and flaky), F8 (destroys collections),
-groups/favourites/drag-and-drop (low value, high maintenance), cross-browser visuals (manual + screenshots),
-permissions (second account; automated later with a second `storageState` once the invite is confirmed).
+Not automated on purpose:
 
-Design choices: unique `QA-auto <run id> …` names and an API cleanup fixture after every test, so a crashed run
-never leaves garbage in the team; page objects for the search bar, the dialog and the tree; every mutation is
-asserted on three levels — UI, request/response, API list.
+- F7 needs uploads and indexing. Slow and flaky.
+- F8 deletes collections. Too destructive for a shared test account.
+- Groups, favourites, drag-and-drop. Low value, high maintenance.
+- Other browsers and layout. Manual with screenshots.
+- Permissions. Needs a second account. I will add it with a second `storageState` once the invite is confirmed.
+
+Design: every test creates its own `QA-auto <run id> …` item. An API fixture deletes all `QA-auto` items after
+each test, so a crashed run leaves nothing behind. Page objects for the search bar, the dialog and the tree. Every
+change is checked on three levels: UI, request/response, API list.
 
 ## 6. Tools
 
-- Manual: Chrome DevTools (Network for the `/savedSearches` calls), the API key with curl for backend rules.
-- Automation: Playwright 1.64 + TypeScript, `dotenv`, HTML report and traces on failure.
-- AI: Claude Code — used to explore the feature quickly (headless scripts that logged in, saved, renamed, deleted a
-  search and captured every request), to draft the first version of the page objects, and to review selectors.
-  Every finding above was checked by hand in the real UI before it went into this plan.
+- Manual: Chrome DevTools (Network tab for `/savedSearches`), curl with the API key for backend rules.
+- Automation: Playwright 1.64 + TypeScript, `dotenv`, HTML report, traces on failure.
+- AI: Claude Code. It wrote the exploration scripts (log in, save, rename, delete, print every request), the first
+  version of the page objects and tests, and reviewed this plan for gaps. I set the scope, checked every flow by
+  hand in the UI and run the suite myself. Details in README.
 
-## 7. Metrics and benchmarks
+## 7. Metrics
 
-- Core scenarios pass rate per release (target 100 %, red build blocks the release of the search area).
-- Escaped defects in saved searches per quarter (target 0 Critical/Major).
-- Automated suite runtime (now ~3 min for 11 tests, serial; keep under 5 min).
-- Flakiness: reruns needed per 20 runs (target 0; any flaky test is fixed or quarantined within a sprint).
-- Time to open a saved search on a 10k-asset library ≤ the same query typed manually (+10 %).
+- Pass rate of core scenarios per release. Target 100 %. A red build blocks the release of the search area.
+- Bugs in saved searches found by users per quarter. Target 0 Critical/Major.
+- Suite run time. Now about 3 minutes for 11 tests. Keep it under 5.
+- Flaky tests: reruns needed per 20 runs. Target 0. A flaky test is fixed or quarantined within a sprint.
+- Time to open a saved search on a 10 000-file library: not slower than the same query typed by hand (+10 %).
 
-## 8. How I communicate results
+## 8. How I report
 
-- Bugs: one ticket per defect with steps, request/response, screenshot or trace; severity by user impact.
-- Per release: a short note in the team channel — what was covered, what is red, what was skipped and why; the
-  HTML report link for the automated part.
-- Risks that need a decision (e.g. "silent failure on long names is shipped for a year, do we fix the UI or raise
-  the server limit?") go to the product manager in writing, with options.
+- Bugs: one ticket per defect. Steps, request and response, screenshot or trace. Severity by user impact.
+- Each release: a short note in the team channel. What was covered, what is red, what was skipped and why. Link to
+  the HTML report for the automated part.
+- Questions that need a decision go to the product manager in writing, with options. Example: "names over 50
+  characters fail silently. Do we fix the dialog or raise the server limit?"
 
-## 9. Findings from this exploration
+## 9. What I found
 
 | Id | Severity | Finding | Evidence |
 |---|---|---|---|
-| SS-BUG-1 | Major | Name longer than 50 characters: the dialog closes, no message, nothing is saved. The input has `maxlength=20000`, the server answers 400 `"name" length must be less than or equal to 50 characters long`. | `tests/saved-searches.spec.ts` (expected failure), screenshot in the report |
-| SS-OBS-1 | Minor | `POST /savedSearches` without `data` is accepted (201); the item then opens as "all assets". API only. | `curl` in section 3.3 |
-| SS-OBS-2 | Minor | Validation errors are raw Joi strings; a UI that starts showing server errors would show `child "body" fails because …` to users. | API tests |
-| SS-IMP-1 | Improvement | The *Save to* tree in the dialog shows only groups, not the searches already saved in them, so a user learns that a name is taken only after typing it (the duplicate message). Showing existing searches (greyed out) under each group would let people pick a free name and avoid near-duplicates like "Guide docs" / "Guide docs 2". | Manual check, dialog screenshot |
+| SS-BUG-1 | Major | A name longer than 50 characters: the dialog closes, no message, nothing is saved. The input allows 20 000 characters, the server answers 400 `"name" length must be less than or equal to 50 characters long`. | `tests/saved-searches.spec.ts` (expected failure), screenshot in the report. Reproduced by hand |
+| SS-OBS-1 | Minor | `POST /savedSearches` without `data` is accepted (201). The item then opens as "all files". API only. | curl, section 3.3 |
+| SS-OBS-2 | Minor | Validation errors are raw strings from the validator. If the UI ever shows server errors, users will read `child "body" fails because …`. | API tests |
+| SS-IMP-1 | Improvement | The *Save to* tree in the dialog shows only groups, not the searches already saved in them. So you learn that a name is taken only after you type it. Showing the existing searches in grey under each group would help pick a free name. | Found while saving a search by hand |

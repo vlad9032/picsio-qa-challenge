@@ -61,13 +61,16 @@ Notes:
 
 ## AI tools used
 
-Claude Code (Anthropic) was used in three places:
+I work with Claude Code (Anthropic) as a pair: I decide what to test and why, the agent does the legwork, I check
+the result. In this challenge it helped in three places:
 
-1. **Exploration.** Short headless Playwright scripts that logged in, saved / renamed / deleted a search and
-   printed every `/savedSearches` request and response. This is how the name rules, the `data-testid`s of the
-   tree actions and the silent >50-character failure were found in about an hour instead of an afternoon.
-2. **First draft of the page objects and fixtures**, then edited by hand: selectors replaced with the stable
-   `data-testid` / class names found above, the counter locator fixed after a failing run (`"2\n assets"`).
-3. **Review of the plan** for gaps against the feature list (groups, favourites, broken searches).
+1. **Exploration.** I asked it to write short headless Playwright scripts that log in, save / rename / delete a
+   search and print every `/savedSearches` request and response. That gave me the API, the name rules, the
+   `data-testid`s of the tree actions and the silent >50-character failure in about an hour. Then I repeated the
+   main flows by hand in the UI.
+2. **First version of the code.** From my list of checks it wrote the page objects, fixtures and tests, and fixed
+   the three locators that failed on the first run (the counter is rendered as `"2\n assets"`, the panel toggle
+   remembers its state). I reviewed every file and run the suite myself.
+3. **Review of the plan** for gaps against the feature (groups, favourites, broken searches).
 
-Everything in `TEST_PLAN.md` was verified by hand in the real UI before it was written down.
+Every finding in `TEST_PLAN.md` was reproduced by hand in the real UI before it was written down.
