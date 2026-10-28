@@ -40,8 +40,10 @@ After every test the API fixture removed all `QA-auto …` items; the team libra
 | SS-OBS-1 | Minor | `POST /savedSearches` without `data` is accepted. API only |
 | SS-OBS-2 | Minor | Server validation messages are raw strings, not user text |
 | SS-IMP-1 | Improvement | The *Save to* tree does not show existing searches, so a taken name is found only after typing |
+| PDF-OBS-1 | Minor, third-party | *Edit* opens a PDF in the embedded Photopea editor. The text is converted with other fonts: lines wrap differently and some icons become `�`. Visible when you zoom in. Found by hand, outside the saved-searches scope |
+| PDF-IMP-1 | Improvement | Pics.io warns that an edited PDF cannot be saved back (download and upload as a revision instead). After that, *File → Save* in the editor does nothing and says nothing. Better: repeat the message on *Save* or disable *Save* for PDF |
 
-Details and evidence: TEST_PLAN.md, section 9.
+Details and evidence: TEST_PLAN.md, section 9, and the `evidence/` folder.
 
 ## Not covered yet, next steps
 

@@ -194,4 +194,11 @@ change is checked on three levels: UI, request/response, API list.
 | SS-BUG-1 | Major | A name longer than 50 characters: the dialog closes, no message, nothing is saved. The input allows 20 000 characters, the server answers 400 `"name" length must be less than or equal to 50 characters long`. | `tests/saved-searches.spec.ts` (expected failure), screenshot in the report. Reproduced by hand |
 | SS-OBS-1 | Minor | `POST /savedSearches` without `data` is accepted (201). The item then opens as "all files". API only. | curl, section 3.3 |
 | SS-OBS-2 | Minor | Validation errors are raw strings from the validator. If the UI ever shows server errors, users will read `child "body" fails because …`. | API tests |
-| SS-IMP-1 | Improvement | The *Save to* tree in the dialog shows only groups, not the searches already saved in them. So you learn that a name is taken only after you type it. Showing the existing searches in grey under each group would help pick a free name. | Found while saving a search by hand |
+| SS-IMP-1 | Improvement | The *Save to* tree in the dialog shows only groups, not the searches already saved in them. So you learn that a name is taken only after you type it. Showing the existing searches in grey under each group would help pick a free name. | Found while saving a search by hand, `evidence/saved-search-duplicate-name.png` |
+
+Found by hand outside the saved-searches scope, while exploring the product:
+
+| Id | Severity | Finding | Evidence |
+|---|---|---|---|
+| PDF-OBS-1 | Minor, third-party | *Edit* on a PDF opens the embedded Photopea editor. The text is converted with other fonts: lines wrap differently and some icons become `�`. Visible when you zoom in. The cause is the PDF import in Photopea, not Pics.io, but the user sees a "damaged" document. | `evidence/pdf-editor-text-after-zoom.png` |
+| PDF-IMP-1 | Improvement | Pics.io warns that an edited PDF cannot be saved back and must be downloaded and uploaded as a revision. After that, *File → Save* in the editor does nothing and says nothing; a user who skipped the warning loses the edit. Better: repeat the message on *Save* or disable *Save* for PDF. | `evidence/pdf-editor-warning.png`; reproduced by hand |
