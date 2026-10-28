@@ -25,8 +25,10 @@ characters (`maxlength=20000`).
 **Expected result:** either the field does not accept more than 50 characters, or the dialog stays open and shows
 a message such as *Name is too long (max 50 characters)*. Nothing is lost silently.
 
-**Evidence:** reproduced by hand twice; autotest `tests/saved-searches.spec.ts › a name longer than 50
-characters…` (marked `test.fail`, trace in the HTML report); API check `tests/saved-searches.api.spec.ts › 50
+**Evidence:** reproduced by hand twice. Screenshots: `evidence/saved-search-long-name.png` (52 characters typed,
+*Ok* enabled) and `evidence/saved-search-long-name-after-ok.png` (after *Ok*: no dialog, no message, no toast).
+Autotest `tests/saved-searches.spec.ts › a name longer than 50 characters…` (marked `test.fail`; it attaches the
+400 response body and a screenshot to the HTML report). API check `tests/saved-searches.api.spec.ts › 50
 characters are accepted, 51 are rejected`.
 
 ---

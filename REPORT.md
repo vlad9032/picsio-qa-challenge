@@ -20,7 +20,7 @@ Vladyslav Hryhorian · 28 October 2026
 
 ## Results
 
-**Automation:** 12 of 12 pass, run time about 2 minutes. One test (`a name longer than 50 characters…`) is marked
+**Automation:** 12 of 12 pass, run time 2–3 minutes. One test (`a name longer than 50 characters…`) is marked
 as an expected failure because of SS-BUG-1; it passes as "expected to fail" and will turn red when the bug is fixed.
 The permission test (TC-10) runs with the invited teammate's own login. After every test the API fixture removed
 all `QA-auto …` items; the team library has no leftovers.
@@ -65,7 +65,7 @@ automated, no Playwright evidence: these are manual observations, reproduced twi
 
 ## Not covered yet, next steps
 
-- Permissions with the second account (TC-10) and the automated version with a second `storageState`.
+- Role rules for a *guest* teammate (rename or delete of someone else's team search): needs a guest account and a role matrix.
 - Live search after upload (TC-09): manual only, needs indexing time.
 - Firefox and Safari, narrow window, touch devices.
 - Broken search after a collection is deleted (F8).

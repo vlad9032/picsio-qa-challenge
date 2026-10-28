@@ -85,7 +85,7 @@ test.describe('Saved searches: name validation in the dialog', () => {
     await expect(search.dialog.ok).toBeDisabled();
   });
 
-  test('a name longer than 50 characters is rejected by the server, and the user must see it', async ({ page, search, api, uniqueName }) => {
+  test('a name longer than 50 characters is rejected by the server, and the user must see it', async ({ page, search, api, uniqueName }, testInfo) => {
     // KNOWN DEFECT (see TEST_PLAN.md, SS-BUG-1): the dialog has no length limit (maxlength=20000), the server answers
     // 400 "name length must be less than or equal to 50", the dialog closes and nothing tells the user. Expected
     // behaviour asserted here; the test is marked as expected-to-fail until the UI shows the error or caps the input.
@@ -95,6 +95,9 @@ test.describe('Saved searches: name validation in the dialog', () => {
     await search.searchFor('guide');
     await search.openSaveDialog();
     const res = await search.dialog.submit(name);
+    // Evidence for the bug report: kept in the HTML report even though the test is an expected failure.
+    await testInfo.attach('POST /savedSearches response', { body: `${res.status()} ${await res.text()}`, contentType: 'text/plain' });
+    await testInfo.attach('page after Ok', { body: await page.screenshot(), contentType: 'image/png' });
     expect(res.status()).toBe(400);
     await expect(page.getByText(/50 characters|too long/i)).toBeVisible();
     expect(await api.findByName(name)).toBeUndefined();

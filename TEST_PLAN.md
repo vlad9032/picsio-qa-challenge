@@ -66,6 +66,8 @@ I explored it by hand and with short scripts that logged every request the web a
 | Delete | hover → trash → *Delete saved search?* → *Delete* | `DELETE /savedSearches/:id` |
 | Group, favourite | hover → *Move to group*, *Add to favorites* | not covered in this plan |
 
+The dialog as it opens: `evidence/saved-search-dialog.png`.
+
 Name rules I found: 1 to 50 characters, unique inside its group (letter case does not matter, built-in names count
 too), HTML tags are rejected. The dialog checks "empty" and "duplicate" before submit. It does not check the length
 (see SS-BUG-1).
@@ -183,7 +185,7 @@ change is checked on three levels: UI, request/response, API list.
 
 - Pass rate of core scenarios per release. Target 100 %. A red build blocks the release of the search area.
 - Bugs in saved searches found by users per quarter. Target 0 Critical/Major.
-- Suite run time. Now about 3 minutes for 12 tests. Keep it under 5.
+- Suite run time. Now 2–3 minutes for 12 tests. Keep it under 5.
 - Flaky tests: reruns needed per 20 runs. Target 0. A flaky test is fixed or quarantined within a sprint.
 - Time to open a saved search on a 10 000-file library: not slower than the same query typed by hand (+10 %).
 
@@ -201,7 +203,7 @@ Full bug reports with steps, actual and expected result: [BUGS.md](BUGS.md).
 
 | Id | Severity | Finding | Evidence |
 |---|---|---|---|
-| SS-BUG-1 | Major | A name longer than 50 characters: the dialog closes, no message, nothing is saved. The input allows 20 000 characters, the server answers 400 `"name" length must be less than or equal to 50 characters long`. | `tests/saved-searches.spec.ts` (expected failure), screenshot in the report. Reproduced by hand |
+| SS-BUG-1 | Major | A name longer than 50 characters: the dialog closes, no message, nothing is saved. The input allows 20 000 characters, the server answers 400 `"name" length must be less than or equal to 50 characters long`. | Reproduced by hand: `evidence/saved-search-long-name.png`, `evidence/saved-search-long-name-after-ok.png`. Autotest `tests/saved-searches.spec.ts` (expected failure; 400 body and screenshot attached in the HTML report) |
 | SS-OBS-1 | Minor | `POST /savedSearches` without `data` is accepted (201). The item then opens as "all files". API only. | curl, section 3.3 |
 | SS-OBS-2 | Minor | Validation errors are raw strings from the validator. If the UI ever shows server errors, users will read `child "body" fails because …`. | API tests |
 | SS-IMP-1 | Improvement | The *Save to* tree in the dialog shows only groups, not the searches already saved in them. So you learn that a name is taken only after you type it. Showing the existing searches in grey under each group would help pick a free name. | Found while saving a search by hand, `evidence/saved-search-duplicate-name.png` |
