@@ -31,8 +31,14 @@ async function login(browser: Browser, email: string, password: string, file: st
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('https://pics.io/login');
-  const cookies = page.getByRole('button', { name: /accept all/i });
-  if (await cookies.isVisible().catch(() => false)) await cookies.click();
+  // The cookie banner (CookieYes) loads asynchronously and covers the form. Accept it whenever it shows up,
+  // so a click on the form is never intercepted; the consent cookie then lands in the stored session.
+  await page.addLocatorHandler(page.locator('.cky-consent-container'), async (banner) => {
+    await banner
+      .getByRole('button', { name: /accept all/i })
+      .click({ timeout: 2_000 })
+      .catch(() => banner.evaluate((el) => el.remove()));
+  });
   await page.getByLabel(/email/i).first().fill(email);
   await page.locator('input[type="password"]').fill(password);
   await page.getByRole('button', { name: /^log in$/i }).last().click();
